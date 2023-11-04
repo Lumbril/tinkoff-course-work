@@ -8,4 +8,5 @@ public interface UserService {
     User getById(Long id);
     User getByUsername(String username);
     void deleteById(Long id);
+    boolean userIsExists(String username);
 }

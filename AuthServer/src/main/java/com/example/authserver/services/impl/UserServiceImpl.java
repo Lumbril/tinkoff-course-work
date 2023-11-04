@@ -51,7 +51,8 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteById(id);
     }
 
-    private boolean userIsExists(String username) {
+    @Override
+    public boolean userIsExists(String username) {
         return userRepository.findByUsername(username).isPresent();
     }
 }
