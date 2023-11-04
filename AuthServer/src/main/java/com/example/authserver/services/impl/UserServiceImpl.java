@@ -3,6 +3,8 @@ package com.example.authserver.services.impl;
 import com.example.authserver.dto.request.UserRegistrationRequest;
 import com.example.authserver.entities.User;
 import com.example.authserver.entities.enums.Role;
+import com.example.authserver.exceptions.UserExistsException;
+import com.example.authserver.exceptions.UserPasswordException;
 import com.example.authserver.repositories.UserRepository;
 import com.example.authserver.services.UserService;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User create(UserRegistrationRequest userFromRequest) {
+        if (!userFromRequest.getPassword().equals(userFromRequest.getPasswordConfirm())) {
+            throw new UserPasswordException("Пароли не совпадают");
+        }
+
+        if (userIsExists(userFromRequest.getUsername())) {
+            throw new UserExistsException();
+        }
+
         User u = User.builder()
                 .username(userFromRequest.getUsername())
                 .password(bCryptPasswordEncoder.encode(userFromRequest.getPassword()))
@@ -39,5 +49,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteById(Long id) {
         userRepository.deleteById(id);
+    }
+
+    private boolean userIsExists(String username) {
+        return userRepository.findByUsername(username).isPresent();
     }
 }

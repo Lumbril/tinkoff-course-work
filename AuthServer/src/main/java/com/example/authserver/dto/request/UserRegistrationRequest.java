@@ -19,4 +19,8 @@ public class UserRegistrationRequest {
     @NotBlank
     @JsonProperty(value = "password", required = true)
     private String password;
+
+    @NotBlank
+    @JsonProperty(value = "password_confirm", required = true)
+    private String passwordConfirm;
 }
