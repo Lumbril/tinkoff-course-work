@@ -1,13 +1,16 @@
 package com.example.authserver.services.impl;
 
+import com.example.authserver.dto.TokenBody;
+import com.example.authserver.dto.request.RefreshRequest;
 import com.example.authserver.dto.request.UserLoginRequest;
 import com.example.authserver.dto.response.AccessAndRefreshJwtResponse;
 import com.example.authserver.entities.User;
+import com.example.authserver.exceptions.InvalidTokenException;
 import com.example.authserver.exceptions.ServerErrorException;
 import com.example.authserver.exceptions.UserInvalidDataException;
 import com.example.authserver.services.JwtService;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -18,6 +21,7 @@ import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 
 @Service
@@ -38,6 +42,26 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public AccessAndRefreshJwtResponse createAccessAndRefreshTokens(UserLoginRequest userLoginRequest) {
         User user = getUserIfPasswordCorrect(userLoginRequest);
+
+        String accessToken = createAccessToken(user);
+        String refreshToken = createRefreshToken(user);
+
+        return AccessAndRefreshJwtResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    @Override
+    public AccessAndRefreshJwtResponse refreshTokens(RefreshRequest refreshRequest) {
+        Claims claims = getClaimsIfTokenValid(refreshRequest.getRefreshToken());
+        TokenBody tokenBody = getTokenBody(claims);
+
+        if (!tokenBody.getTokenType().equals("refresh")) {
+            throw new InvalidTokenException();
+        }
+
+        User user = userService.getById(tokenBody.getUserId());
 
         String accessToken = createAccessToken(user);
         String refreshToken = createRefreshToken(user);
@@ -86,6 +110,37 @@ public class JwtServiceImpl implements JwtService {
                 .compact();
     }
 
+    private Claims getClaimsIfTokenValid(String token) {
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(getPublicKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException |
+                 UnsupportedJwtException |
+                 MalformedJwtException |
+                 SignatureException |
+                 IllegalArgumentException exception) {
+            throw new InvalidTokenException();
+        }
+    }
+
+    private TokenBody getTokenBody(Claims claims) {
+        try {
+            return TokenBody.builder()
+                    .userId(claims.get("user_id", Long.class))
+                    .username(claims.get("username", String.class))
+                    .tokenType(claims.get("token_type", String.class))
+                    .jti(claims.getId())
+                    .iat(claims.getIssuedAt())
+                    .exp(claims.getExpiration())
+                    .build();
+        } catch (RequiredTypeException exception) {
+            throw new InvalidTokenException();
+        }
+    }
+
     private Key getPrivateKey() {
         try {
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
@@ -102,7 +157,7 @@ public class JwtServiceImpl implements JwtService {
         try {
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             byte [] bytes = Base64.getDecoder().decode(PUBLIC_KEY);
-            PKCS8EncodedKeySpec keySpecPv = new PKCS8EncodedKeySpec(bytes);
+            X509EncodedKeySpec keySpecPv = new X509EncodedKeySpec(bytes);
 
             return keyFactory.generatePublic(keySpecPv);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {

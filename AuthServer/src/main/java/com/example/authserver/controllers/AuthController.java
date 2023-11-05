@@ -1,13 +1,11 @@
 package com.example.authserver.controllers;
 
+import com.example.authserver.dto.request.RefreshRequest;
 import com.example.authserver.dto.request.UserLoginRequest;
 import com.example.authserver.dto.request.UserRegistrationRequest;
 import com.example.authserver.dto.response.AccessAndRefreshJwtResponse;
 import com.example.authserver.dto.response.ErrorResponse;
-import com.example.authserver.exceptions.ServerErrorException;
-import com.example.authserver.exceptions.UserExistsException;
-import com.example.authserver.exceptions.UserInvalidDataException;
-import com.example.authserver.exceptions.UserPasswordException;
+import com.example.authserver.exceptions.*;
 import com.example.authserver.services.impl.JwtServiceImpl;
 import com.example.authserver.services.impl.UserServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -81,6 +79,23 @@ public class AuthController {
         return ResponseEntity.ok().body(response);
     }
 
+    @Operation(summary = "Обновить токены")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "201",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = AccessAndRefreshJwtResponse.class)
+                    )
+            )
+    })
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(@Validated @RequestBody RefreshRequest refreshRequest) {
+        AccessAndRefreshJwtResponse response = jwtService.refreshTokens(refreshRequest);
+
+        return ResponseEntity.ok().body(response);
+    }
+
     @ExceptionHandler(UserExistsException.class)
     public ResponseEntity<?> handleUserExists(UserExistsException exception) {
         return ResponseEntity.badRequest().body(
@@ -111,6 +126,15 @@ public class AuthController {
     @ExceptionHandler(ServerErrorException.class)
     public ResponseEntity<?> handleServerError(ServerErrorException exception) {
         return ResponseEntity.internalServerError().body(
+                ErrorResponse.builder()
+                        .error(exception.getMessage())
+                        .build()
+        );
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<?> handleInvalidToken(InvalidTokenException exception) {
+        return ResponseEntity.badRequest().body(
                 ErrorResponse.builder()
                         .error(exception.getMessage())
                         .build()
