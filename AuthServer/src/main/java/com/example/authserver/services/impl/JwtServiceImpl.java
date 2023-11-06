@@ -37,6 +37,7 @@ public class JwtServiceImpl implements JwtService {
     private long REFRESH_TOKEN_EXPIRATION;
 
     private final UserServiceImpl userService;
+    private final BlacklistRefreshTokenServiceImpl blacklistRefreshTokenService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
@@ -61,10 +62,16 @@ public class JwtServiceImpl implements JwtService {
             throw new InvalidTokenException();
         }
 
+        if (blacklistRefreshTokenService.isExists(tokenBody.getJti())) {
+            throw new InvalidTokenException("This refresh token is invalid");
+        }
+
         User user = userService.getById(tokenBody.getUserId());
 
         String accessToken = createAccessToken(user);
         String refreshToken = createRefreshToken(user);
+
+        blacklistRefreshTokenService.save(tokenBody.getJti());
 
         return AccessAndRefreshJwtResponse.builder()
                 .accessToken(accessToken)
