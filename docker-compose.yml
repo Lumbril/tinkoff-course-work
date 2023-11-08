@@ -12,4 +12,10 @@ services:
       - ./persistentdata/static:/var/www/static
       - ./persistentdata/media:/var/www/media
     depends_on:
-      - web
+      - auth_server
+
+  auth_server:
+    restart: always
+    build: ./AuthServer
+    ports:
+      - "8000:8000"
