@@ -44,12 +44,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         User user = userService.getByAuthIdOrCreateFromTokenBody(tokenBody);
 
-        if (user.getFirstName().isEmpty() || user.getLastName().isEmpty()) {
-            filterChain.doFilter(request, response);
-
-            throw new UnfinishedUserException();
-        }
-
         if (!(user != null && SecurityContextHolder.getContext().getAuthentication() == null)) {
             filterChain.doFilter(request, response);
 
