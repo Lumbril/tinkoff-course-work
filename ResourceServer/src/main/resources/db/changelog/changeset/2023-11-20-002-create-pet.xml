@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="create-pet" author="Vitaliy">
+        <createTable tableName="pet">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="type_pet_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+            <column name="name" type="varchar(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="gender" type="boolean">
+                <constraints nullable="true"/>
+            </column>
+            <column name="image" type="varchar(200)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+        
+        <addForeignKeyConstraint baseTableName="pet"
+                                 baseColumnNames="type_pet_id"
+                                 constraintName="fk_type_pet"
+                                 referencedTableName="type_pet"
+                                 referencedColumnNames="id"
+                                 onDelete="SET NULL"/>
+        <addForeignKeyConstraint baseTableName="pet"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_user"
+                                 referencedTableName="user"
+                                 referencedColumnNames="id"
+                                 onDelete="SET NULL"/>
+    </changeSet>
+</databaseChangeLog>

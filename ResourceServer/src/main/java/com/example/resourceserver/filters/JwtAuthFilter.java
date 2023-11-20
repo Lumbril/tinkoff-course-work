@@ -2,7 +2,6 @@ package com.example.resourceserver.filters;
 
 import com.example.resourceserver.dto.TokenBody;
 import com.example.resourceserver.entities.User;
-import com.example.resourceserver.exceptions.UnfinishedUserException;
 import com.example.resourceserver.services.impl.JwtServiceImpl;
 import com.example.resourceserver.services.impl.UserServiceImpl;
 import jakarta.servlet.FilterChain;
