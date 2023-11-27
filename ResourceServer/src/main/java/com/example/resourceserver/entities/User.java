@@ -29,6 +29,9 @@ public class User implements CustomUserDetails {
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 
+    @Column(name = "password", nullable = false)
+    private String password;
+
     @Column(name = "first_name")
     private String firstName;
 
@@ -50,7 +53,7 @@ public class User implements CustomUserDetails {
 
     @Override
     public String getPassword() {
-        return null;
+        return password;
     }
 
     @Override
