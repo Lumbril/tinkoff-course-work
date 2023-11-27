@@ -12,6 +12,8 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
 
@@ -29,13 +31,20 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, HandlerMappingIntrospector introspector) throws Exception {
+        MvcRequestMatcher.Builder mvcRequestMatcher = new MvcRequestMatcher.Builder(introspector);
+
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.disable())
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(toH2Console()).permitAll()
-                        .anyRequest().permitAll()
+                        .requestMatchers(mvcRequestMatcher.pattern("/swagger-ui/**")).permitAll()
+                        .requestMatchers(mvcRequestMatcher.pattern("/swagger-ui.html")).permitAll()
+                        .requestMatchers(mvcRequestMatcher.pattern("/swagger/**")).permitAll()
+                        .requestMatchers(mvcRequestMatcher.pattern("/v3/api-docs/**")).permitAll()
+                        .requestMatchers(mvcRequestMatcher.pattern("/test/*")).permitAll()
+                        .anyRequest().authenticated()
                 )
                 .headers(headers -> headers.frameOptions(FrameOptionsConfig::disable))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

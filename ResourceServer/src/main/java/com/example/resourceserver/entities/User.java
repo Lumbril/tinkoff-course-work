@@ -1,13 +1,13 @@
 package com.example.resourceserver.entities;
 
 import com.example.resourceserver.entities.enums.Role;
+import com.example.resourceserver.utils.CustomUserDetails;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
@@ -17,7 +17,7 @@ import java.util.Collection;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User implements UserDetails {
+public class User implements CustomUserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, unique = true)
