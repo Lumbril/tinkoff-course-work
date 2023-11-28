@@ -1,9 +1,11 @@
 package com.example.resourceserver.controllers;
 
+import com.example.resourceserver.dto.request.PetImageRequest;
 import com.example.resourceserver.dto.request.PetRequest;
 import com.example.resourceserver.dto.response.ErrorResponse;
 import com.example.resourceserver.dto.response.PetResponse;
 import com.example.resourceserver.entities.Pet;
+import com.example.resourceserver.services.impl.MediaServiceImpl;
 import com.example.resourceserver.services.impl.PetServiceImpl;
 import com.example.resourceserver.utils.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -100,6 +102,43 @@ public class PetController {
                         .image(pet.getImage())
                         .userId(userDetails.getId())
                         .build());
+    }
+
+    @Operation(summary = "Сохранить фотографию питомца")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = PetResponse.class)
+                            )
+                    }
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class)
+                            )
+                    }
+            )
+    })
+    @PostMapping(value = "/{id}", consumes = {"multipart/form-data"})
+    public ResponseEntity<?> saveImage(@PathVariable Long id,
+                                      @ModelAttribute PetImageRequest petImageRequest,
+                                      @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Pet pet = petService.updateImage(id, userDetails.getId(), petImageRequest.getImage());
+
+        return ResponseEntity.ok().body(PetResponse.builder()
+                    .id(pet.getId())
+                    .typePet(pet.getTypePetId())
+                    .name(pet.getName())
+                    .gender(pet.getGender())
+                    .image(pet.getImage())
+                    .userId(pet.getUserId().getId())
+                .build());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

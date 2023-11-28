@@ -6,6 +6,7 @@ import com.example.resourceserver.repositories.PetRepository;
 import com.example.resourceserver.services.PetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -15,6 +16,7 @@ public class PetServiceImpl implements PetService {
     private final PetRepository petRepository;
     private final TypePetServiceImpl typePetService;
     private final UserServiceImpl userService;
+    private final MediaServiceImpl mediaService;
 
     @Override
     public Pet get(Long id) {
@@ -39,6 +41,14 @@ public class PetServiceImpl implements PetService {
     @Override
     public Pet update(PetRequest petRequest) {
         return null;
+    }
+
+    @Override
+    public Pet updateImage(Long petId, Long userId, MultipartFile file) {
+        Pet pet = petRepository.findByIdAndUserId_Id(petId, userId).orElseThrow();
+        pet.setImage(mediaService.saveImage(file));
+
+        return petRepository.save(pet);
     }
 
     @Override
