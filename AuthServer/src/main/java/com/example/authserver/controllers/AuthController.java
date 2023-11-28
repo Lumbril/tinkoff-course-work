@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Auth", description = "API for registration and generation JWT")
 @RestController
+@CrossOrigin("*")
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
