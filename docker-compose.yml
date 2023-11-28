@@ -19,3 +19,9 @@ services:
     build: ./AuthServer
     ports:
       - "8000:8000"
+
+  resource_server:
+    restart: always
+    build: ./ResourceServer
+    ports:
+      - "8001:8001"
