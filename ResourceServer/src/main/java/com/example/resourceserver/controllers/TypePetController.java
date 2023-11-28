@@ -1,7 +1,6 @@
 package com.example.resourceserver.controllers;
 
 import com.example.resourceserver.dto.response.ErrorResponse;
-import com.example.resourceserver.dto.response.PetResponse;
 import com.example.resourceserver.dto.response.TypePetResponse;
 import com.example.resourceserver.entities.TypePet;
 import com.example.resourceserver.services.impl.TypePetServiceImpl;
