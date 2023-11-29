@@ -14,4 +14,5 @@ public interface PetService {
     Pet update(PetRequest petRequest);
     Pet updateImage(Long petId, Long userId, MultipartFile file);
     void delete(Long petId);
+    void deleteByIdAndUser(Long petId, Long userId);
 }

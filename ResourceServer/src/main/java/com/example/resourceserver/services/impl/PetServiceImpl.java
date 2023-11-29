@@ -55,4 +55,10 @@ public class PetServiceImpl implements PetService {
     public void delete(Long petId) {
         petRepository.deleteById(petId);
     }
+
+    @Override
+    public void deleteByIdAndUser(Long petId, Long userId) {
+        Pet pet = petRepository.findByIdAndUserId_Id(petId, userId).orElseThrow();
+        petRepository.deleteById(pet.getId());
+    }
 }

@@ -54,8 +54,8 @@ public class PetController {
                     }
             )
     })
-    @GetMapping
-    public ResponseEntity<?> doGet(@RequestParam Long id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<?> doGet(@PathVariable Long id) {
         Pet pet = petService.get(id);
 
         return ResponseEntity.ok().body(PetResponse.builder()
@@ -139,6 +139,34 @@ public class PetController {
                     .image(pet.getImage())
                     .userId(pet.getUserId().getId())
                 .build());
+    }
+
+    @Operation(summary = "Удалить своего питомца по id")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json"
+                            )
+                    }
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class)
+                            )
+                    }
+            )
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> doDelete(@PathVariable Long id,
+                                      @AuthenticationPrincipal CustomUserDetails userDetails) {
+        petService.deleteByIdAndUser(id, userDetails.getId());
+
+        return ResponseEntity.ok().build();
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
