@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="create-friend" author="Vitaliy">
+        <createTable tableName="friend">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="user1_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+            <column name="user2_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="enum('WAITING', 'ACCEPTED', 'DENIED')">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <addForeignKeyConstraint baseTableName="friend" 
+                                 baseColumnNames="user1_id" 
+                                 constraintName="fk_user1" 
+                                 referencedTableName="user"
+                                 referencedColumnNames="id"
+                                 onDelete="SET NULL"/>
+        <addForeignKeyConstraint baseTableName="friend"
+                                 baseColumnNames="user2_id"
+                                 constraintName="fk_user2"
+                                 referencedTableName="user"
+                                 referencedColumnNames="id"
+                                 onDelete="SET NULL"/>
+        
+        <createIndex tableName="friend" indexName="idx_user1_id">
+            <column name="user1_id"></column>
+        </createIndex>
+        <createIndex tableName="friend" indexName="idx_user2_id">
+            <column name="user2_id"></column>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>
