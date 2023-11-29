@@ -24,7 +24,7 @@ import java.util.NoSuchElementException;
 @RequestMapping("/type_pet")
 @SecurityRequirement(name = "Bearer Authentication")
 @Tag(name = "Type pets", description = "Методы для типов домашних животных")
-@CrossOrigin(origins = {"*"})
+@CrossOrigin("*")
 @RequiredArgsConstructor
 public class TypePetController {
     private final TypePetServiceImpl typePetService;

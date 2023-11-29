@@ -30,7 +30,7 @@ import java.util.NoSuchElementException;
 @RequestMapping("/user")
 @SecurityRequirement(name = "Bearer Authentication")
 @Tag(name = "User", description = "Методы пользователей")
-@CrossOrigin(origins = {"*"})
+@CrossOrigin("*")
 @RequiredArgsConstructor
 public class UserController {
     private final UserServiceImpl userService;
