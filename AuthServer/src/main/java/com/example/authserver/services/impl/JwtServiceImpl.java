@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Key;
 import java.security.KeyFactory;
@@ -41,6 +42,7 @@ public class JwtServiceImpl implements JwtService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
+    @Transactional
     public AccessAndRefreshJwtResponse createAccessAndRefreshTokens(UserLoginRequest userLoginRequest) {
         User user = getUserIfPasswordCorrect(userLoginRequest);
 
@@ -54,6 +56,7 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
+    @Transactional
     public AccessAndRefreshJwtResponse refreshTokens(RefreshRequest refreshRequest) {
         Claims claims = getClaimsIfTokenValid(refreshRequest.getRefreshToken());
         TokenBody tokenBody = getTokenBody(claims);

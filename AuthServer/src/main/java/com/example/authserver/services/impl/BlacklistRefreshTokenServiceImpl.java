@@ -5,6 +5,7 @@ import com.example.authserver.repositories.BlacklistRefreshTokenRepository;
 import com.example.authserver.services.BlacklistRefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -12,6 +13,7 @@ public class BlacklistRefreshTokenServiceImpl implements BlacklistRefreshTokenSe
     private final BlacklistRefreshTokenRepository blacklistRefreshTokenRepository;
 
     @Override
+    @Transactional
     public BlacklistRefreshToken save(String jti) {
         return blacklistRefreshTokenRepository.save(
                 BlacklistRefreshToken.builder()
@@ -20,6 +22,7 @@ public class BlacklistRefreshTokenServiceImpl implements BlacklistRefreshTokenSe
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean isExists(String jti) {
         return blacklistRefreshTokenRepository.existsByJti(jti);
     }

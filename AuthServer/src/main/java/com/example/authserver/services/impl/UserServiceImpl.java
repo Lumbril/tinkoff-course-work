@@ -10,6 +10,7 @@ import com.example.authserver.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +19,7 @@ public class UserServiceImpl implements UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
+    @Transactional
     public User create(UserRegistrationRequest userFromRequest) {
         if (!userFromRequest.getPassword().equals(userFromRequest.getPasswordConfirm())) {
             throw new UserPasswordException("Пароли не совпадают");
@@ -37,21 +39,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public User getById(Long id) {
         return userRepository.findById(id).orElseThrow();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public User getByUsername(String username) {
         return userRepository.findByUsername(username).orElseThrow();
     }
 
     @Override
+    @Transactional
     public void deleteById(Long id) {
         userRepository.deleteById(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean userIsExists(String username) {
         return userRepository.findByUsername(username).isPresent();
     }
