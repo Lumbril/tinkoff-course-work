@@ -8,6 +8,7 @@ import com.example.resourceserver.repositories.FriendRepository;
 import com.example.resourceserver.services.FriendService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,21 +20,25 @@ public class FriendServiceImpl implements FriendService {
     private final UserServiceImpl userService;
 
     @Override
+    @Transactional(readOnly = true)
     public List<Friend> getFriends(Long userId) {
         return friendRepository.findAllByUser1_IdAndStatus(userId, FriendStatus.ACCEPTED);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Friend> getIncomingRequests(Long userId) {
         return friendRepository.findAllByUser2_IdAndStatus(userId, FriendStatus.WAITING);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Friend> getSubscribers(Long userId) {
         return friendRepository.findAllByUser2_IdAndStatus(userId, FriendStatus.DENIED);
     }
 
     @Override
+    @Transactional
     public Friend createFriendRequest(Long whoId, Long whomId) {
         if (whoId == whomId) {
             throw new FriendException("Нельзя добавить в друзья самого себя");
@@ -56,6 +61,7 @@ public class FriendServiceImpl implements FriendService {
     }
 
     @Override
+    @Transactional
     public Friend moveToSubscribers(Long friendId, Long userId) {
         Optional<Friend> friendOptional = friendRepository.findByIdAndUser2_Id(friendId, userId);
 
@@ -70,6 +76,7 @@ public class FriendServiceImpl implements FriendService {
     }
 
     @Override
+    @Transactional
     public void moveToFriend(Long friendId, Long userId) {
         Optional<Friend> friendOptional = friendRepository.findByIdAndUser2_Id(friendId, userId);
 
