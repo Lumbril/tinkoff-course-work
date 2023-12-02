@@ -102,6 +102,74 @@ public class FriendServiceImpl implements FriendService {
         friendRepository.save(secondFriend);
     }
 
+    @Override
+    @Transactional
+    public void removeFromFriend(Long user1Id, Long user2Id) {
+        Friend user1WithUser2 = friendRepository.findByUser1_IdAndUser2_IdAndStatus(user1Id,
+                user2Id,
+                FriendStatus.ACCEPTED
+        ).orElseThrow(() -> {
+            throw new FriendException("Вы не являетесь друзьями");
+        });
+
+        Friend user2WithUser1 = friendRepository.findByUser1_IdAndUser2_IdAndStatus(user2Id,
+                user1Id,
+                FriendStatus.ACCEPTED
+        ).orElseThrow(() -> {
+            throw new FriendException("Вы не являетесь друзьями");
+        });
+
+        user1WithUser2.setStatus(FriendStatus.DENIED);
+        friendRepository.save(user1WithUser2);
+        friendRepository.delete(user2WithUser1);
+    }
+
+    @Override
+    @Transactional
+    public void removeFromSubscribers(Long user1Id, Long user2Id) {
+        Friend friend = friendRepository.findByUser1_IdAndUser2_IdAndStatus(user1Id,
+                user2Id,
+                FriendStatus.DENIED
+        ).orElseThrow(() -> {
+            throw new FriendException("У вас нет такого подписчика");
+        });
+
+        friendRepository.delete(friend);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Friend> getRequests(Long userId) {
+        return friendRepository.findAllByUser1_IdAndStatus(userId, FriendStatus.WAITING);
+    }
+
+    @Override
+    @Transactional
+    public void removeRequest(Long id, Long userId) {
+        if (!friendRepository.existsByIdAndUser1_IdAndStatus(id, userId, FriendStatus.WAITING)) {
+            throw new FriendException("У вас нет такого запроса на дружбу");
+        }
+
+        friendRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Friend> getSubscriptions(Long userId) {
+        return friendRepository.findAllByUser1_IdAndStatus(userId, FriendStatus.DENIED);
+    }
+
+    @Override
+    @Transactional
+    public void unsubscribe(Long user1Id, Long user2Id) {
+        Friend friend = friendRepository.findByUser1_IdAndUser2_IdAndStatus(user1Id,
+                user2Id,
+                FriendStatus.DENIED
+        ).orElseThrow(() -> {throw new FriendException("У вас нет подписки на этого пользователя");});
+
+        friendRepository.delete(friend);
+    }
+
     private boolean checkIsExistsByUser1AndUser2(Long whoId, Long whomId) {
         return friendRepository.findByUser1_IdAndUser2_Id(whoId, whomId).isPresent();
     }

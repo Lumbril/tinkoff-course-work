@@ -78,7 +78,7 @@ public class FriendController {
                     }
             )
     })
-    @GetMapping("/requests")
+    @GetMapping("/request/list")
     public ResponseEntity<?> getIncomingRequests(@AuthenticationPrincipal CustomUserDetails userDetails) {
         List<Friend> friends = friendService.getIncomingRequests(userDetails.getId());
         List<FriendResponse> friendResponseList = friendResponseListWithUser1(friends);
@@ -98,7 +98,7 @@ public class FriendController {
                     }
             )
     })
-    @GetMapping("/subscribers")
+    @GetMapping("/subscriber/list")
     public ResponseEntity<?> getSubscribers(@AuthenticationPrincipal CustomUserDetails userDetails) {
         List<Friend> friends = friendService.getSubscribers(userDetails.getId());
         List<FriendResponse> friendResponseList = friendResponseListWithUser1(friends);
@@ -188,7 +188,7 @@ public class FriendController {
                     }
             )
     })
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/request/{id}")
     public ResponseEntity<?> deleteRequest(@PathVariable Long id,
                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
         Friend friend = friendService.moveToSubscribers(id, userDetails.getId());
@@ -205,6 +205,122 @@ public class FriendController {
                 .build());
     }
 
+    @Operation(summary = "Удалить из друзей (перевести в подписчики)")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class)
+                            )
+                    }
+            )
+    })
+    @DeleteMapping("/{user_id}")
+    public ResponseEntity<?> deleteFriend(@PathVariable("user_id") Long userId,
+                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
+        friendService.removeFromFriend(userId, userDetails.getId());
+
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Удалить из подписчиков")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class)
+                            )
+                    }
+            )
+    })
+    @DeleteMapping("/subscribe/my/{user_id}")
+    public ResponseEntity<?> deleteSubscriber(@PathVariable("user_id") Long userId,
+                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
+        friendService.removeFromSubscribers(userId, userDetails.getId());
+
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Список отправленных запросов")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json",
+                                    array = @ArraySchema(schema = @Schema(implementation = FriendResponse.class))
+                            )
+                    }
+            )
+    })
+    @GetMapping("/request/my/list")
+    public ResponseEntity<?> getMyRequests(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<Friend> friends = friendService.getRequests(userDetails.getId());
+
+        return ResponseEntity.ok().body(friendResponseListWithUser2(friends));
+    }
+
+    @Operation(summary = "Удалить свой запрос на дружбу")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class)
+                            )
+                    }
+            )
+    })
+    @DeleteMapping("/request/my/{id}")
+    public ResponseEntity<?> deleteMyRequest(@PathVariable Long id,
+                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
+        friendService.removeRequest(id, userDetails.getId());
+
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Список на кого подписан")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json",
+                                    array = @ArraySchema(schema = @Schema(implementation = FriendResponse.class))
+                            )
+                    }
+            )
+    })
+    @GetMapping("/subscriptions/list")
+    public ResponseEntity<?> getMySubscriptions(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<Friend> friends = friendService.getSubscriptions(userDetails.getId());
+
+        return ResponseEntity.ok().body(friendResponseListWithUser2(friends));
+    }
+
+    @Operation(summary = "Отписаться")
+    @DeleteMapping("/subscription/{user_id}")
+    public ResponseEntity<?> unsubscribe(@PathVariable("user_id") Long userId,
+                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+        friendService.unsubscribe(userDetails.getId(), userId);
+
+        return ResponseEntity.ok().build();
+    }
+
     private List<FriendResponse> friendResponseListWithUser1(List<Friend> friends) {
         return friends.stream()
                 .map(friend -> FriendResponse.builder()
@@ -214,6 +330,22 @@ public class FriendController {
                                 .username(friend.getUser1().getUsername())
                                 .firstName(friend.getUser1().getFirstName())
                                 .lastName(friend.getUser1().getLastName())
+                                .build()
+                        )
+                        .status(friend.getStatus())
+                        .build()
+                ).toList();
+    }
+
+    private List<FriendResponse> friendResponseListWithUser2(List<Friend> friends) {
+        return friends.stream()
+                .map(friend -> FriendResponse.builder()
+                        .id(friend.getId())
+                        .user(UserResponse.builder()
+                                .id(friend.getUser2().getId())
+                                .username(friend.getUser2().getUsername())
+                                .firstName(friend.getUser2().getFirstName())
+                                .lastName(friend.getUser2().getLastName())
                                 .build()
                         )
                         .status(friend.getStatus())
