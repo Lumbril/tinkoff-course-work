@@ -25,3 +25,5 @@ services:
     build: ./ResourceServer
     ports:
       - "8001:8001"
+    volumes:
+      - ./persistentdata/media:/persistentdata/media
