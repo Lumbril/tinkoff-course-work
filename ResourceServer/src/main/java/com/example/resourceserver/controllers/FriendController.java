@@ -159,7 +159,7 @@ public class FriendController {
                     }
             )
     })
-    @PostMapping("/requests/{id}")
+    @PostMapping("/request/{id}")
     public ResponseEntity<?> acceptRequest(@PathVariable Long id,
                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
         friendService.moveToFriend(id, userDetails.getId());

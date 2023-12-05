@@ -50,8 +50,8 @@ public class TypePetController {
                     }
             )
     })
-    @GetMapping
-    public ResponseEntity<?> doGet(@RequestParam Long id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<?> doGet(@PathVariable Long id) {
         TypePet typePet = typePetService.get(id);
 
         if (typePet == null) {
@@ -62,14 +62,6 @@ public class TypePetController {
                         .id(typePet.getId())
                         .name(typePet.getName())
                         .build());
-    }
-
-    public ResponseEntity<?> doPost() {
-        return ResponseEntity.ok().build();
-    }
-
-    public ResponseEntity<?> doDelete() {
-        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Получить типы дом. животных")
