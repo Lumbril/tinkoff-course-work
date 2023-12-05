@@ -1,4 +1,4 @@
-package com.example.resourceserver;
+package com.example.resourceserver.services;
 
 
 import com.example.resourceserver.dto.TokenBody;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceTest {
+public class UserServiceTests {
     @Mock
     private UserRepository userRepository;
 
